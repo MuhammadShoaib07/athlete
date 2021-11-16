@@ -1,0 +1,14 @@
+.link-button {
+  border: 1xp solid #323232;
+  padding: 5px;
+  border-radius: 40%;
+  background-color: #343536;
+  color: white;
+}
+.link-button :hover {
+  background-color: white;
+  color: #343536;
+}
+a.active {
+  background: #232425;
+}
