@@ -1,72 +1,72 @@
 import React from "react";
-import { useState, useRef } from "react";
+import { useRef } from "react";
 import { useHistory } from "react-router";
 import axios from "axios";
+import { userActions } from "../../store/user/user-slice";
+import { useDispatch } from "react-redux";
 
 const Adduser = () => {
-  const [message, setMessage] = useState();
   const history = useHistory();
+  const dispatch = useDispatch();
 
-  const userNmaeRref = useRef();
-  const firstNmaeRref = useRef();
-  const lastNmaeRref = useRef();
-  const EmailRref = useRef();
-  const passwordRref = useRef();
-  const confirmPassRref = useRef();
-  const roleRref = useRef();
+  const userNameRef = useRef();
+  const EmailRef = useRef();
+  const firstNmaeRef = useRef();
+  const lastNmaeRef = useRef();
+  const passwordRef = useRef();
+  const confirmPassRef = useRef();
+  const roleRef = useRef();
   const userImgRef = useRef();
 
   const signinHanlder = async (event) => {
-    const token = localStorage.getItem("token");
     event.preventDefault();
-    const enteredUserName = userNmaeRref.current.value;
-    const enteredFirstName = firstNmaeRref.current.value;
-    const enteredlastName = lastNmaeRref.current.value;
-    const enteredEmail = EmailRref.current.value;
-    const enteredPasswor = passwordRref.current.value;
-    const enteredConfirmPassword = confirmPassRref.current.value;
-    const enteredRole = roleRref.current.value;
+    const enteredUserName = userNameRef.current.value;
+    const enteredEmail = EmailRef.current.value;
+    const enteredFirstName = firstNmaeRef.current.value;
+    const enteredlastName = lastNmaeRef.current.value;
+    const enteredPasswor = passwordRef.current.value;
+    const enteredConfirmPassword = confirmPassRef.current.value;
+    const enteredRole = roleRef.current.value;
     const selectedImg = userImgRef.current.files[0];
 
-    console.log(selectedImg);
-    if (
-      enteredUserName === "" &&
-      enteredFirstName === "" &&
-      enteredlastName === "" &&
-      enteredEmail === "" &&
-      enteredPasswor === "" &&
-      enteredConfirmPassword === ""
-    )
-      setMessage("Enter All The Credientils");
-    else {
-      const userData = new FormData();
-      userData.append("userName", enteredUserName);
-      userData.append("firstName", enteredFirstName);
-      userData.append("lastname", enteredlastName);
-      userData.append("email", enteredEmail);
-      userData.append("password", enteredPasswor);
-      userData.append("confirm_password", enteredConfirmPassword);
-      userData.append("roles", enteredRole);
-      userData.append("image", selectedImg);
-      await axios("http://localhost:8000/api/v1/signup", {
-        method: "POST",
-        headers: {
-          "content-type": "multipart/form-data",
-          Authorization: token,
-        },
-        data: userData,
-      }).then((res) => {
-        if (res.data.success) {
-          if (res.data.data.token !== undefined) {
-            setMessage("User Successfully Created");
-            history.push("user");
-          }
-        } else if (res.data.success === false) {
-          setMessage("Some Thing Went Wrong");
+    const newUserRData = {
+      userName: enteredUserName,
+      firstName: enteredFirstName,
+      lastName: enteredlastName,
+      email: enteredEmail,
+      password: enteredPasswor,
+      confirm_password: enteredConfirmPassword,
+      roles: enteredRole,
+      image: selectedImg,
+    };
+    const userD = new FormData();
+    userD.append("userName", enteredUserName);
+    userD.append("firstName", enteredFirstName);
+    userD.append("lastName", enteredlastName);
+    userD.append("email", enteredEmail);
+    userD.append("password", enteredPasswor);
+    userD.append("confirm_password", enteredConfirmPassword);
+    userD.append("roles", enteredRole);
+    userD.append("image", selectedImg);
+    await axios("http://localhost:8000/api/v1/signup", {
+      method: "POST",
+      headers: {
+        "content-type": "multipart/form-data",
+      },
+      data: userD,
+    }).then((res) => {
+      if (res.data.success === true) {
+        if (res.data.data.token !== undefined) {
+          dispatch(userActions.addUser(res.data.data.user));
+          alert("User Successfully Created");
+          history.push("user");
         }
-      });
-    }
+      } else if (res.data.success === false) {
+        alert("Some Thing Went Wrong");
+      }
+    });
   };
+
   return (
     <div className="content-wrapper">
       <div class="content-header">
@@ -98,7 +98,6 @@ const Adduser = () => {
 
                 <form onSubmit={signinHanlder}>
                   <div className="card-body">
-                    {message && <p className="text-danger"> {message} </p>}
                     <div className="form-group">
                       <label for="exampleInputEmail1">User Nmae</label>
                       <input
@@ -106,7 +105,7 @@ const Adduser = () => {
                         className="form-control"
                         id="exampleInputEmail1"
                         placeholder="Enter Name"
-                        ref={userNmaeRref}
+                        ref={userNameRef}
                         required
                       />
                     </div>
@@ -117,7 +116,7 @@ const Adduser = () => {
                         className="form-control"
                         id="exampleInputPassword1"
                         placeholder="Email"
-                        ref={EmailRref}
+                        ref={EmailRef}
                         required
                       />
                     </div>
@@ -128,7 +127,7 @@ const Adduser = () => {
                         className="form-control"
                         id="exampleInputEmail1"
                         placeholder="First Name"
-                        ref={firstNmaeRref}
+                        ref={firstNmaeRef}
                         required
                       />
                     </div>
@@ -139,7 +138,7 @@ const Adduser = () => {
                         className="form-control"
                         id="exampleInputEmail1"
                         placeholder="Last Name"
-                        ref={lastNmaeRref}
+                        ref={lastNmaeRef}
                         required
                       />
                     </div>
@@ -150,7 +149,7 @@ const Adduser = () => {
                         className="form-control"
                         id="exampleInputEmail1"
                         placeholder="Password"
-                        ref={passwordRref}
+                        ref={passwordRef}
                         required
                       />
                     </div>
@@ -161,7 +160,7 @@ const Adduser = () => {
                         className="form-control"
                         id="exampleInputEmail1"
                         placeholder="password"
-                        ref={confirmPassRref}
+                        ref={confirmPassRef}
                         required
                       />
                     </div>
@@ -170,35 +169,35 @@ const Adduser = () => {
                       <select
                         class="custom-select form-control-border"
                         id="exampleSelectBorder"
-                        ref={roleRref}
+                        ref={roleRef}
                         required
                       >
                         <option value="user">user</option>
                         <option value="admin">admin</option>
                       </select>
                     </div>
-                  </div>
 
-                  <div class="form-group">
-                    <label htmlFor="exampleInputFile">File input</label>
-                    <div class="input-group">
-                      <div class="custom-file">
-                        <input
-                          type="file"
-                          class="custom-file-input"
-                          id="exampleInputFile"
-                          ref={userImgRef}
-                          required
-                        />
-                        <label
-                          class="custom-file-label"
-                          htmlFor="exampleInputFile"
-                        >
-                          Choose file
-                        </label>
-                      </div>
-                      <div class="input-group-append">
-                        <span class="input-group-text">Upload</span>
+                    <div class="form-group">
+                      <label htmlFor="exampleInputFile">File input</label>
+                      <div class="input-group">
+                        <div class="custom-file">
+                          <input
+                            type="file"
+                            class="custom-file-input"
+                            id="exampleInputFile"
+                            ref={userImgRef}
+                            // required
+                          />
+                          <label
+                            class="custom-file-label"
+                            htmlFor="exampleInputFile"
+                          >
+                            Choose file
+                          </label>
+                        </div>
+                        <div class="input-group-append">
+                          <span class="input-group-text">Upload</span>
+                        </div>
                       </div>
                     </div>
                   </div>

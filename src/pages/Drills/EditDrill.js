@@ -112,7 +112,7 @@ const EditDrill = () => {
             .then((response) => {
               console.log(response);
               if (response.data.success === true) {
-                alert("item added successfully");
+                alert("item update successfully");
                 history.push("drills");
               } else {
                 alert("some thing went wrong");
@@ -121,31 +121,6 @@ const EditDrill = () => {
             .catch((error) => {
               alert(error);
             });
-        });
-    } else {
-      const drillData = new FormData();
-      const drill_id = location.state.drill_id;
-      drillData.append("name", drillName);
-      drillData.append("athlete", athleteName);
-      drillData.append("category", categoryName);
-      drillData.append("difficultyLevel", diffLvl);
-      drillData.append("isPremium", true);
-      axios(`http://localhost:8000/api/v1//admin/drills/${drill_id}`, {
-        method: "post",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: token,
-        },
-        data: drillData,
-      })
-        .then((response) => {
-          console.log(response);
-          if (response.data.success === true) {
-            alert("item added successfully");
-            history.push("drills");
-          } else {
-            alert("some thing went wrong");
-          }
         })
         .catch((error) => {
           alert(error);

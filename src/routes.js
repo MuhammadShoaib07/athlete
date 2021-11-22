@@ -12,7 +12,9 @@ const SpeedLevel = React.lazy(() => import("./pages/SpeedLevel/SpeedLevel"));
 const Subscription = React.lazy(() =>
   import("./pages/Subscription/Subscription")
 );
+const DrillVideos = React.lazy(() => import("./pages/DrillVideos/DrillVideos"));
 
+/********************  Add Components ***************************/
 const AddAthlete = React.lazy(() => import("./pages/Athlete/AddAthlete"));
 const AddCategory = React.lazy(() => import("./pages/Categories/AddCategory"));
 const AddDIfficultyLevel = React.lazy(() =>
@@ -26,6 +28,9 @@ const AddSubscription = React.lazy(() =>
 );
 const AddDrill = React.lazy(() => import("./pages/Drills/AddDrill"));
 const AddUser = React.lazy(() => import("./pages/User/Adduser"));
+const AddDrillVideos = React.lazy(() =>
+  import("./pages/DrillVideos/AddDrillVideos")
+);
 
 /*************** Edit Components *****************/
 const EditCategory = React.lazy(() =>
@@ -56,6 +61,13 @@ const routes = [
   },
   { path: "/speedLevel", name: "SpeedLevel", component: SpeedLevel },
   { path: "/subscription", name: "Subscription", component: Subscription },
+  {
+    path: "/drills-videos/:id",
+    name: "Drill Videos",
+    component: DrillVideos,
+    exact: true,
+  },
+  /********************* Addd Routes *********************** */
   { path: "/addAthlete", name: "Add Athlete", component: AddAthlete },
   { path: "/addCategory", name: "Add  Category", component: AddCategory },
   {
@@ -71,6 +83,13 @@ const routes = [
   },
   { path: "/addDrill", name: "Add Drill", component: AddDrill },
   { path: "/addUser", name: "Add user ", component: AddUser },
+  {
+    path: "/addDrillVideos",
+    name: "Add Drill Videos",
+    component: AddDrillVideos,
+  },
+
+  /************************ Edit Routes ***************************** */
   {
     path: "/editAthlete",
     name: "Add Athlete",

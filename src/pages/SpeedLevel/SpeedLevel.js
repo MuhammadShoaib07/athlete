@@ -3,8 +3,10 @@ import { useHistory } from "react-router";
 import axios from "axios";
 
 const SpeedLevel = () => {
-  const history = useHistory();
   const [speedLevel, setSpeedLevel] = useState([]);
+  const [totalItems, setTotalItems] = useState();
+
+  const history = useHistory();
 
   useEffect(() => {
     getAllSpeedLevel();
@@ -23,6 +25,34 @@ const SpeedLevel = () => {
 
     console.log(result.data.data.speedLevel);
     setSpeedLevel(result.data.data.speedLevel);
+    setTotalItems(result.data.count);
+  };
+
+  const handlePageChange = (pagNumber) => {
+    const token = localStorage.getItem("token");
+    axios
+      .get(`http://localhost:8000/api/v1//admin/speed/?page=${pagNumber}`, {
+        headers: {
+          Authorization: token,
+        },
+      })
+      .then((response) => {
+        setSpeedLevel(response.data.data.speedLevel);
+      });
+  };
+
+  const handyMethod = () => {
+    debugger;
+    const total = totalItems;
+    const itemPerpage = 10;
+    const divide = total / itemPerpage;
+    let result = Math.ceil(divide);
+    let pages = [];
+    for (let i = 0; i < result; i++) {
+      pages[i] = i + 1;
+    }
+    console.log(pages);
+    return pages;
   };
 
   const editSpeedLevelHanlder = (id) => {
@@ -134,7 +164,10 @@ const SpeedLevel = () => {
                 </div>
 
                 <div class="card-body">
-                  <table id="example2" class="table table-bordered table-hover">
+                  <table
+                    id="example2"
+                    class="table table-bordered table-hover table-striped"
+                  >
                     <thead>
                       <tr>
                         <th>Id</th>
@@ -147,6 +180,22 @@ const SpeedLevel = () => {
                     <tbody>{speedLevels}</tbody>
                   </table>
                 </div>
+                <nav aria-label="Page navigation example">
+                  <ul class="pagination">
+                    {handyMethod().map((item, id) => {
+                      return (
+                        <li class="page-item" key={id}>
+                          <a
+                            class="page-link"
+                            onClick={() => handlePageChange(item)}
+                          >
+                            {item}
+                          </a>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </nav>
               </div>
             </div>
           </div>

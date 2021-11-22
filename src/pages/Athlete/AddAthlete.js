@@ -7,11 +7,6 @@ const NewAthlete = () => {
   const athleteInputImg = useRef();
 
   const history = useHistory();
-  const [seltedAthleteImg, setSeletedAthleteImg] = useState();
-
-  const athleteImagChangehanlder = (event) => {
-    setSeletedAthleteImg(event.target.files[0]);
-  };
 
   const newAthleteHandler = async (event) => {
     // debugger;
@@ -97,7 +92,6 @@ const NewAthlete = () => {
                             class="custom-file-input"
                             id="exampleInputFile"
                             ref={athleteInputImg}
-                            onChange={athleteImagChangehanlder}
                           />
                           <label
                             class="custom-file-label"

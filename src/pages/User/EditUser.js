@@ -3,28 +3,33 @@ import { useState, useRef } from "react";
 import axios from "axios";
 import { useHistory, useLocation } from "react-router";
 
+import { userActions } from "../../store/user/user-slice";
+import { useDispatch, useSelector } from "react-redux";
+
 const EditUser = () => {
   const userNmaeRref = useRef();
   const firstNmaeRref = useRef();
   const lastNmaeRref = useRef();
   const EmailRref = useRef();
-  const passwordRref = useRef();
-  const confirmPassRref = useRef();
   const roleRref = useRef();
   const userImgRef = useRef();
 
   const location = useLocation();
   const history = useHistory();
+  const dispatch = useDispatch();
 
   const [editUser, SetEdituser] = useState();
+  // const editUser = useSelector((state) => state.users.editUser);
 
   useEffect(() => {
     getUserData();
   }, []);
+
   const getUserData = async () => {
     const token = localStorage.getItem("token");
 
     const userId = location.state.user_id;
+    const userIndex = location.state.index;
     const result = await axios.get(
       `http://localhost:8000/api/v1//admin/users/${userId}`,
       {
@@ -34,7 +39,9 @@ const EditUser = () => {
       }
     );
     console.log(result.data.data.user);
+
     SetEdituser(result.data.data.user);
+    // dispatch(userActions.editUser(result.data.data.user));
   };
 
   const editUserHandler = async (event) => {
@@ -48,39 +55,83 @@ const EditUser = () => {
     // const enteredConfirmPassword = confirmPassRref.current.value;
     const enteredRole = roleRref.current.value;
     const selectedImg = userImgRef.current.files[0];
+    const userId = location.state.user_id;
+    const userIndex = location.state.index;
 
-    const athleteId = location.state.athlete_id;
+    if (selectedImg !== undefined) {
+      const userData = new FormData();
+      userData.append("userName", enteredUserName);
+      userData.append("firstName", enteredFirstName);
+      userData.append("lastName", enteredlastName);
+      userData.append("email", enteredEmail);
+      userData.append("roles", enteredRole);
+      userData.append("image", selectedImg);
 
-    const userData = new FormData();
-    userData.append("userName", enteredUserName);
-    userData.append("firstName", enteredFirstName);
-    userData.append("lastName", enteredlastName);
-    userData.append("email", enteredEmail);
-    // userData.append("password", enteredPasswor);
-    // userData.append("confirm_password", enteredConfirmPassword);
-    userData.append("roles", enteredRole);
-    userData.append("image", selectedImg);
-
-    await axios(`http://localhost:8000/api/v1//admin/users/${athleteId}`, {
-      method: "POST",
-      headers: {
-        "content-type": "multipart/form-data",
-        Authorization: token,
-      },
-    })
-      .then((response) => {
-        console.log(response);
-        if (response.status === 200) {
-          alert("updated successfully");
-          history.push("user");
-        } else {
-          alert("some thing went wrong");
-        }
+      await axios(`http://localhost:8000/api/v1//admin/users/${userId}`, {
+        method: "POST",
+        headers: {
+          "content-type": "multipart/form-data",
+          Authorization: token,
+        },
+        data: userData,
       })
-      .catch((error) => {
-        throw error;
-      });
+        .then((response) => {
+          console.log(response);
+          if (response.status === 200) {
+            // dispatch();
+            alert("updated successfully");
+            dispatch(
+              userActions.editUserByIndex({ data: { userIndex, userData } })
+            );
+            // history.push("user");
+          } else {
+            alert("some thing went wrong");
+          }
+        })
+        .catch((error) => {
+          throw error;
+        });
+    } else {
+      const userData = new FormData();
+      userData.append("userName", enteredUserName);
+      userData.append("firstName", enteredFirstName);
+      userData.append("lastName", enteredlastName);
+      userData.append("email", enteredEmail);
+      userData.append("roles", enteredRole);
+
+      const editUserData = {
+        userName: enteredUserName,
+        firstName: enteredFirstName,
+        lastName: enteredlastName,
+        email: enteredEmail,
+        roles: enteredRole,
+      };
+
+      await axios(`http://localhost:8000/api/v1//admin/users/${userId}`, {
+        method: "POST",
+        headers: {
+          Authorization: token,
+        },
+        data: userData,
+      })
+        .then((response) => {
+          console.log(response);
+          if (response.status === 200) {
+            dispatch(
+              userActions.editUserByIndex({ data: { userIndex, editUserData } })
+            );
+            alert("updated successfully");
+            history.push("user");
+          } else {
+            alert("some thing went wrong");
+          }
+        })
+        .catch((error) => {
+          throw error;
+        });
+    }
   };
+
   const ChangeHanlder = (event) => {
     const { name, value } = event.target;
     SetEdituser((preValue) => {
@@ -90,6 +141,7 @@ const EditUser = () => {
       };
     });
   };
+
   return (
     <div className="content-wrapper">
       <div class="content-header">
@@ -160,7 +212,7 @@ const EditUser = () => {
                         value={editUser && editUser.firstName}
                         required
                         onChange={ChangeHanlder}
-                        name="firstname"
+                        name="firstName"
                       />
                     </div>
                     <div className="form-group">
@@ -216,29 +268,39 @@ const EditUser = () => {
                         <option value="admin">admin</option>
                       </select>
                     </div>
-                  </div>
 
-                  <div class="form-group">
-                    <label htmlFor="exampleInputFile">File input</label>
-                    <div class="input-group">
-                      <div class="custom-file">
-                        <input
-                          type="file"
-                          class="custom-file-input"
-                          id="exampleInputFile"
-                          ref={userImgRef}
-                          required
-                        />
-                        <label
-                          class="custom-file-label"
-                          htmlFor="exampleInputFile"
-                        >
-                          Choose file
-                        </label>
+                    <div class="form-group">
+                      <label htmlFor="exampleInputFile">File input</label>
+                      <div class="input-group">
+                        <div class="custom-file">
+                          <input
+                            type="file"
+                            class="custom-file-input"
+                            id="exampleInputFile"
+                            ref={userImgRef}
+                          />
+                          <label
+                            class="custom-file-label"
+                            htmlFor="exampleInputFile"
+                          >
+                            Choose file
+                          </label>
+                        </div>
+                        <div class="input-group-append">
+                          <span class="input-group-text">Upload</span>
+                        </div>
                       </div>
-                      <div class="input-group-append">
-                        <span class="input-group-text">Upload</span>
-                      </div>
+                      <img
+                        src={
+                          editUser &&
+                          `http://localhost:8000/image/${editUser.image}`
+                        }
+                        style={{
+                          height: "75px",
+                          width: "70px",
+                          borderRadius: "50%",
+                        }}
+                      />
                     </div>
                   </div>
 

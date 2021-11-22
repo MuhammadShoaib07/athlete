@@ -3,9 +3,11 @@ import { useHistory } from "react-router";
 import axios from "axios";
 
 const Subscription = () => {
+  const [subscription, setSubscription] = useState([]);
+  const [totalItems, setTotalItes] = useState();
+
   const history = useHistory();
 
-  const [subscription, setSubscription] = useState([]);
   useEffect(() => {
     getAllSubscription();
   }, []);
@@ -22,13 +24,47 @@ const Subscription = () => {
       }
     );
 
-    console.log(result.data.data.subscriptions);
+    console.log(result);
     setSubscription(result.data.data.subscriptions);
+    setTotalItes(result.data.data.subscriptions.length);
   };
+
+  const handlePageChange = (pagNumber) => {
+    const token = localStorage.getItem("token");
+    axios
+      .get(
+        `http://localhost:8000/api/v1//admin/subscription/?page=${pagNumber}`,
+        {
+          headers: {
+            Authorization: token,
+          },
+        }
+      )
+      .then((response) => {
+        console.log(response.data.data.subscriptions);
+        setSubscription(response.data.data.subscriptions);
+      });
+  };
+
+  const handyMethod = () => {
+    debugger;
+    const total = totalItems;
+    const itemPerpage = 10;
+    const divide = total / itemPerpage;
+    let result = Math.ceil(divide);
+    let pages = [];
+    for (let i = 0; i < result; i++) {
+      pages[i] = i + 1;
+    }
+    console.log(pages);
+    return pages;
+  };
+
   const editSubscriptionHandler = (id) => {
     // console.log("clicked subs");
     history.push("editSubscription", { subscription_id: id });
   };
+
   const delteSubscriptionHandler = (id) => {
     let confirmAction = window.confirm("Are you sure to delete it");
     if (confirmAction) {
@@ -148,6 +184,22 @@ const Subscription = () => {
                     <tbody>{subscriptions}</tbody>
                   </table>
                 </div>
+                <nav aria-label="Page navigation example">
+                  <ul class="pagination">
+                    {handyMethod().map((item, id) => {
+                      return (
+                        <li class="page-item" key={id}>
+                          <a
+                            class="page-link "
+                            onClick={() => handlePageChange(item)}
+                          >
+                            {item}
+                          </a>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </nav>
               </div>
             </div>
           </div>

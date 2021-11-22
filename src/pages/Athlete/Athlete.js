@@ -5,6 +5,8 @@ import { useHistory } from "react-router";
 
 const Athlete = () => {
   const [athlete, setAthlete] = useState([]);
+  const [totalItems, setTotalItems] = useState();
+
   const history = useHistory();
 
   useEffect(() => {
@@ -21,9 +23,38 @@ const Athlete = () => {
         },
       }
     );
-    console.log(result.data.data.athlete);
+    // console.log(result.data.data.athlete);
     setAthlete(result.data.data.athlete);
+    setTotalItems(result.data.count);
   };
+
+  const handlePageChange = (pagNumber) => {
+    const token = localStorage.getItem("token");
+    axios
+      .get(`http://localhost:8000/api/v1//admin/athlete/?page=${pagNumber}`, {
+        headers: {
+          Authorization: token,
+        },
+      })
+      .then((response) => {
+        setAthlete(response.data.data.athlete);
+      });
+  };
+
+  const handyMethod = () => {
+    debugger;
+    const total = totalItems;
+    const itemPerpage = 10;
+    const divide = total / itemPerpage;
+    let result = Math.ceil(divide);
+    let pages = [];
+    for (let i = 0; i < result; i++) {
+      pages[i] = i + 1;
+    }
+    console.log(pages);
+    return pages;
+  };
+
   const editHandler = (id) => {
     history.push("editAthlete", { athlete_id: id });
   };
@@ -103,6 +134,46 @@ const Athlete = () => {
     history.push("addAthlete");
   };
 
+  const colums = [
+    {
+      label: "Name",
+      field: "name",
+      width: 150,
+      attributes: {
+        "aria-controls": "DataTable",
+        "aria-label": "Name",
+      },
+    },
+    {
+      label: "Position",
+      field: "position",
+      width: 270,
+    },
+    {
+      label: "Office",
+      field: "office",
+      width: 200,
+    },
+    {
+      label: "Age",
+      field: "age",
+      sort: "asc",
+      width: 100,
+    },
+    {
+      label: "Start date",
+      field: "date",
+      sort: "disabled",
+      width: 150,
+    },
+    {
+      label: "Salary",
+      field: "salary",
+      sort: "disabled",
+      width: 100,
+    },
+  ];
+
   return (
     <div class="content-wrapper">
       <div class="content-header">
@@ -145,7 +216,10 @@ const Athlete = () => {
                 </div>
 
                 <div class="card-body">
-                  <table id="example2" class="table table-bordered table-hover">
+                  <table
+                    id="example2"
+                    class="table table-bordered table-hover table-striped"
+                  >
                     <thead>
                       <tr>
                         <th>Id</th>
@@ -157,6 +231,23 @@ const Athlete = () => {
                     <tbody> {athletes}</tbody>
                   </table>
                 </div>
+
+                <nav aria-label="Page navigation example">
+                  <ul class="pagination">
+                    {handyMethod().map((item, id) => {
+                      return (
+                        <li class="page-item" key={id}>
+                          <a
+                            class="page-link"
+                            onClick={() => handlePageChange(item)}
+                          >
+                            {item}
+                          </a>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </nav>
               </div>
             </div>
           </div>

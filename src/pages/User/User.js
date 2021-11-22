@@ -1,14 +1,23 @@
 import React from "react";
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useHistory } from "react-router";
 import axios from "axios";
 import avatar from "../../assets/img/default-avatar.png";
-const User = () => {
+import { useSelector, useDispatch } from "react-redux";
+import { userActions } from "../../store/user/user-slice";
+
+const User = (props) => {
   const history = useHistory();
-  const [user, setUser] = useState([]);
+  const userData = useSelector((state) => state.users.users);
+  const userCount = useSelector((state) => state.users.count);
+  console.log(userCount);
+  const dispatch = useDispatch();
 
   useEffect(() => {
-    getAllusers();
+    if (userCount === 0) {
+      getAllusers();
+    }
+    // dispatch(userActions.getusers());
   }, []);
 
   const getAllusers = async () => {
@@ -22,22 +31,21 @@ const User = () => {
         },
       }
     );
-
     console.log(result.data.data.user);
-    setUser(result.data.data.user);
+    dispatch(userActions.setUsers(result.data.data.user));
   };
 
-  const editUserHanlder = (id) => {
-    history.push("editUser", { user_id: id });
+  const editUserHanlder = (id, index) => {
+    history.push("editUser", { user_id: id, index: index });
   };
-  const delteUserHnadler = (id) => {
+  const delteUserHnadler = (id, index) => {
     let confirmAction = window.confirm("Are you sure to delete it");
     if (confirmAction) {
-      deleteAction(id);
+      deleteAction(id, index);
     }
   };
 
-  const deleteAction = (id) => {
+  const deleteAction = (id, index) => {
     const token = localStorage.getItem("token");
     axios
       .delete(`http://localhost:8000/api/v1//admin/users/${id}`, {
@@ -46,14 +54,13 @@ const User = () => {
         },
       })
       .then((response) => {
-        // alert("deleted Successfully");
-        getAllusers();
+        dispatch(userActions.deleteUser(index));
       });
   };
 
   let users = null;
-  if (user.length > 0) {
-    users = user.map((user, id) => {
+  if (userData.length > 0) {
+    users = userData.map((user, id) => {
       return (
         <tr key={id}>
           <td>{id + 1}</td>
@@ -83,7 +90,7 @@ const User = () => {
               <button
                 className="btn btn-primary"
                 onClick={() => {
-                  editUserHanlder(user._id);
+                  editUserHanlder(user._id, id);
                 }}
               >
                 Edit
@@ -91,7 +98,7 @@ const User = () => {
               <button
                 className="btn btn-danger"
                 onClick={() => {
-                  delteUserHnadler(user._id);
+                  delteUserHnadler(user._id, id);
                 }}
               >
                 Delete

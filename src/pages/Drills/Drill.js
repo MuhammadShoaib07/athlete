@@ -2,10 +2,13 @@ import React from "react";
 import { useState, useEffect } from "react";
 import { useHistory } from "react-router";
 import axios from "axios";
+import { Link } from "react-router-dom";
 
 const Drill = () => {
-  const history = useHistory();
   const [drill, setDrill] = useState([]);
+  const [totalItems, SetTotalItems] = useState();
+
+  const history = useHistory();
 
   useEffect(() => {
     getAllDrills();
@@ -24,10 +27,39 @@ const Drill = () => {
 
     console.log(result.data.data.drills);
     setDrill(result.data.data.drills);
+    SetTotalItems(result.data.count);
   };
+
+  const handlePageChange = (pagNumber) => {
+    const token = localStorage.getItem("token");
+    axios
+      .get(`http://localhost:8000/api/v1//admin/drills/?page=${pagNumber}`, {
+        headers: {
+          Authorization: token,
+        },
+      })
+      .then((response) => {
+        setDrill(response.data.data.drills);
+      });
+  };
+
+  const handyMethod = () => {
+    const total = totalItems;
+    const itemPerpage = 10;
+    const divide = total / itemPerpage;
+    let result = Math.ceil(divide);
+    let pages = [];
+    for (let i = 0; i < result; i++) {
+      pages[i] = i + 1;
+    }
+    console.log(pages);
+    return pages;
+  };
+
   const editDrillhanlder = (id) => {
     history.push("editDrill", { drill_id: id });
   };
+
   const delteDrillHandler = () => {};
 
   let drills = null;
@@ -37,7 +69,9 @@ const Drill = () => {
       return (
         <tr key={id}>
           <td>{id + 1}</td>
-          <td> {drill.name}</td>
+          <td>
+            <Link to={`drills-videos/${drill._id}`}>{drill.name} </Link>
+          </td>
           <td>{drill.athlete.name}</td>
           <td> {drill.category.name}</td>
           <td> {drill.difficultyLevel.name}</td>
@@ -139,6 +173,22 @@ const Drill = () => {
                     <tbody>{drills}</tbody>
                   </table>
                 </div>
+                <nav aria-label="Page navigation example">
+                  <ul class="pagination">
+                    {handyMethod().map((item, id) => {
+                      return (
+                        <li class="page-item" key={id}>
+                          <a
+                            class="page-link"
+                            onClick={() => handlePageChange(item)}
+                          >
+                            {item}
+                          </a>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </nav>
               </div>
             </div>
           </div>
